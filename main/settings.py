@@ -11,16 +11,31 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+import os
+from cryptography.fernet import Fernet
+import environ
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Create the file .env_old if this doesn't exist
+file = Path(os.path.join(BASE_DIR, 'grupo_9', '.env'))
+if file.exists():
+    env = environ.Env()
+    environ.Env.read_env()
+    SECRET_KEY = env('SECRET_KEY')
+else:
+    SECRET_KEY = Fernet.generate_key()
+    file_key = open(os.path.join(BASE_DIR, 'grupo_9', '.env'), 'w')
+    file_key.writelines(f'SECRET_KEY={SECRET_KEY}')
+    file_key.close()
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-gze^q1=m52en63v)1+h$#&#%g0g%cmpve3@y@rbjp*$^k%!uxg"
+# SECRET_KEY = "django-insecure-gze^q1=m52en63v)1+h$#&#%g0g%cmpve3@y@rbjp*$^k%!uxg"
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True

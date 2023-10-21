@@ -1,0 +1,50 @@
+{% load static %}
+<header>
+
+    <nav>
+      <div class="branding">
+        <a href="{% url 'index' %}">
+          <img src="{% static 'img/logo.png' %}" alt="CENS 451">
+          <p class="name_branding">CENS 451</p>
+        </a>
+      </div>
+
+      {% comment %} links desktop {% endcomment %}
+
+      <ul id="navId" class="navigation">
+        <li><a href="{% url 'index' %}">Inicio</a></li>
+        {% comment %} <li><a href="{% url 'cens' %}">CENS</a></li> {% endcomment %}
+        {% comment %} <li><a href="{% url 'fines' %}">Plan Fines</a></li> {% endcomment %}
+        {% comment %} <li><a href="{% url 'docentes' %}">Docentes</a></li> {% endcomment %}
+        {% comment %} <li><a href="{% url 'contacto' %}">Contacto</a></li> {% endcomment %}
+        <li>
+          {% comment %} <a href="{% url 'sign' %}"> {% endcomment %}
+            {% comment %} <button type="button" class="btn btn-primary">Ingresar</button> {% endcomment %}
+          {% comment %} </a> {% endcomment %}
+        </li>
+
+      </ul>
+
+      {% comment %} responsive mobile {% endcomment %}
+
+      <div id="iconNavId" class="iconNavbar">
+          <i  class="fa-solid fa-bars" ></i>
+      </div>
+
+      <div id="navMobileId">
+        <ul>
+            <li><a class="link" href="{% url 'index' %}">Inicio</a></li>
+            {% comment %} <li><a class="link" href="{% url 'cens' %}">CENS</a></li> {% endcomment %}
+            {% comment %} <li><a class="link" href="{% url 'fines' %}">Plan Fines</a></li> {% endcomment %}
+            {% comment %} <li><a class="link" href="{% url 'docentes' %}">Docentes</a></li> {% endcomment %}
+            {% comment %} <li><a class="link" href="{% url 'contacto' %}">Contacto</a></li> {% endcomment %}
+            
+            {% comment %} <a href="{% url 'sign' %}"> {% endcomment %}
+              {% comment %} <button type="button" class="btn btn-primary">Ingresar</button> {% endcomment %}
+            {% comment %} </a> {% endcomment %}
+            
+        </ul>
+      </div>
+
+    </nav>
+  </header>

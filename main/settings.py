@@ -20,14 +20,14 @@ import environ
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Create the file .env_old if this doesn't exist
-file = Path(os.path.join(BASE_DIR, 'grupo_9', '.env'))
+file = Path(os.path.join(BASE_DIR, 'main', '.env'))
 if file.exists():
     env = environ.Env()
     environ.Env.read_env()
     SECRET_KEY = env('SECRET_KEY')
 else:
     SECRET_KEY = Fernet.generate_key()
-    file_key = open(os.path.join(BASE_DIR, 'grupo_9', '.env'), 'w')
+    file_key = open(os.path.join(BASE_DIR, 'main', '.env'), 'w')
     file_key.writelines(f'SECRET_KEY={SECRET_KEY}')
     file_key.close()
 

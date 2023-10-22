@@ -1,12 +1,11 @@
 import pandas as pd
 import openpyxl
 
-class ExcelDataframe:
+class ExcelToDataFrame:
     def __init__(self, excel, sheet):
-        self.excel = excel  # archivo
-        self.sheet = sheet  # hoja
-        self.dataframe = pd.read_excel(self.excel, self.sheet, header=1)
+        self.__excel = excel  # archivo
+        self.__sheet = sheet  # hoja
+        self.__dataframe = pd.read_excel(self.__excel, self.__sheet, header=0).set_index('Id.')
 
     def get_dataframe(self):
-        
-        return self.dataframe
+        return self.__dataframe

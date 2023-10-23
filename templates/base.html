@@ -48,6 +48,11 @@
     {% block main %}{% endblock %}
     {% comment %} {% include 'components/footer.html' %} {% endcomment %}
     Hola Mundo
+    <form action="post">
+        {% csrf_token %}
+        {{ material_form.as_div }}
+        {{ dimensions_form.as_div }}
+    </form>
     {# scripts #}
     {% comment %} <script src="{% static 'js/navbar.js' %}?{% now 'U'%}"></script> {% endcomment %}
     

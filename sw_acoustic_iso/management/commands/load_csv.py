@@ -16,6 +16,6 @@ class Command(BaseCommand):
             for row in reader:
                 Materials.objects.get_or_create(material=row['Material'], 
                                                 density=float(row['Densidad']),
-                                                young_module=float(row['Módulo de Young']),
-                                                loss_factor=float(row['Factor de pérdidas']),
-                                                poisson_module=float(row['Módulo Poisson']))
+                                                young_module=float(row['Modulo de Young']),
+                                                loss_factor=float(row['Factor de perdidas']),
+                                                poisson_module=float(row['Modulo Poisson']))

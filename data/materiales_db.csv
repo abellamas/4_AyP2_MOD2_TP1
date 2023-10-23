@@ -1,12 +1,12 @@
-﻿Id.,Material,Densidad,Módulo de Young,Factor de pérdidas,Módulo Poisson
+﻿Id.,Material,Densidad,Modulo de Young,Factor de perdidas,Modulo Poisson
 1,Acero,7700,195000000000.00,0.00,0.3
 2,Aluminio,2700,71000000000.00,0.00,0.15
 3,Bronce,8500,95000000000.00,0.01,0.35
 4,Cobre,8915,127000000000.00,0.01,0.34
 5,Contrachapado,600,8300000000.00,0.05,0
 6,Hierro,7700,195000000000.00,0.00,0.15
-7,Hormigón,2400,30000000000.00,0.05,0.2
-8,Hormigón ladrillo,900,4800000000.00,0.05,0.12
+7,Hormigon,2400,30000000000.00,0.05,0.2
+8,Hormigon ladrillo,900,4800000000.00,0.05,0.12
 9,Ladrillo,2100,25000000000.00,0.01,0.15
 10,Madera,650,12000000000.00,0.01,0.15
 11,Neopreno,1200,100000000.00,0.10,0.49

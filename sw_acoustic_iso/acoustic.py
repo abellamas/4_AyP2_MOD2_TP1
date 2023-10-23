@@ -57,7 +57,6 @@ class Panel():
         else:
             raise('Thickness cant be zero')
 
-    
     @property
     def mass_sup(self):
         if self.thickness != 0:
@@ -84,6 +83,11 @@ class Panel():
         return f'Material: {self.__name}\n Densidad: {self.__density}\n Módulo de Young: {self.__young_module}\n Factor de pérdidas: {self.__loss_factor}\n Módulo de Poisson: {self.__poisson_module}'
     
     def cramer_model(self, frecuencies):
+        
+        self.mass_sup
+        self.stiffness
+        self.freq_critic
+        self.freq_res
         f_analysis = np.append(frecuencies, self.__freq_critic)
         f_analysis.sort()
         r_vs_freq = []

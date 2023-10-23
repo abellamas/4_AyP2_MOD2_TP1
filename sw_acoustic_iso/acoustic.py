@@ -82,7 +82,7 @@ class Panel():
     def data(self):
         return f'Material: {self.__name}\n Densidad: {self.__density}\n Módulo de Young: {self.__young_module}\n Factor de pérdidas: {self.__loss_factor}\n Módulo de Poisson: {self.__poisson_module}'
     
-    def cramer_model(self, frecuencies):
+    def cremer_model(self, frecuencies):
         
         self.mass_sup
         self.stiffness

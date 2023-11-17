@@ -104,4 +104,5 @@ class Panel():
                 r_vs_freq.append(r)
                 
         return f_analysis, r_vs_freq
-        
+    
+    

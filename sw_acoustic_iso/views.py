@@ -19,11 +19,12 @@ def index(request):
             f_per_thirds = [20, 25, 31.5, 40, 50, 63, 80, 100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000, 6300, 8000, 10000, 12500, 16000, 20000]
             f_cremer, r_cremer = panel.cremer_model(f_per_thirds)
             fig = px.line(x=f_cremer, y=r_cremer, log_x=True, color_discrete_sequence=['red'], labels={'x': 'Frecuencia [Hz]', 'y': 'R [dB]'})
-            fig.update_layout(legend_title_text='Modelo de Cremer')
+            # fig.update_layout(legend_title_text='Modelo de Cremer')
+            # fig.update_layout(autosize=True)
             fig.update_xaxes(tickvals=f_per_thirds, ticktext=f_per_thirds)
             fig_html = fig.to_html()
             
-            return render(request, 'base.html', {'material_form': material_form, 'dimensions_form': dimensions_form, 'fig_html' : fig_html})
+            return render(request, 'base.html', {'material_form': material_form, 'dimensions_form': dimensions_form, 'fig_html' : fig_html, 'stiffness' : panel.stiffness, 'mass_sup':panel.mass_sup, 'freq_res': panel.freq_res, 'freq_critic': panel.freq_critic})
             
         else:
             print("Error en la validacion")

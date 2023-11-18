@@ -11,6 +11,7 @@ class Panel():
         self.__lx = float(lx)
         self.__ly = float(lx)
         self.__thickness = float(thickness)
+        self.__density_air = 1.18
         self.__vel_sound_air = 343
         self.__stiffness = 0
         self.__mass_sup = 0
@@ -82,27 +83,178 @@ class Panel():
     def data(self):
         return f'Material: {self.__name}\n Densidad: {self.__density}\n Módulo de Young: {self.__young_module}\n Factor de pérdidas: {self.__loss_factor}\n Módulo de Poisson: {self.__poisson_module}'
     
-    def cremer_model(self, frecuencies):
+    def cremer_model(self, frequencies):
         
         self.mass_sup
         self.stiffness
         self.freq_critic
         self.freq_res
-        f_analysis = np.append(frecuencies, self.__freq_critic)
+        f_analysis = np.append(frequencies, self.__freq_critic)
         f_analysis.sort()
-        r_vs_freq = []
+        reduction = []
         
         for f in f_analysis:
             if f < self.__freq_critic:
                 r = 20*np.log10(self.__mass_sup*f) - 47 
-                r_vs_freq.append(r)
+                reduction.append(r)
             elif f == self.__freq_critic:
                 r = 20*np.log10(self.__mass_sup*f) - 47 - 10*np.log10(np.pi/(4*(self.__loss_factor+self.__mass_sup/(485*np.sqrt(f))))) 
-                r_vs_freq.append(r)
+                reduction.append(r)
             else:
                 r = 20*np.log10(self.__mass_sup*f) - 47 - 10*np.log10(np.pi/4*(self.__loss_factor+self.__mass_sup/(485*np.sqrt(f)))) + 10*np.log10(f/self.__freq_critic) + 10*np.log10(1-self.__freq_critic/f) 
-                r_vs_freq.append(r)
+                reduction.append(r)
                 
-        return f_analysis, r_vs_freq
+        return f_analysis, reduction
     
+    # MODELO DE DAVY
+    def __shear(self, f):
+        omega = 2 * np.pi * f
+        chi = (1 + self.__poisson_module) / (0.87 + 1.12 * self.__poisson_module) 
+        chi = chi * chi
+        X = self.__thickness**2 / 12 
+        QP = self.__young_module / (1 - self.__poisson_module**2) 
+        C = -omega**2
+        B = C * (1 + 2 * chi / (1 - self.__poisson_module)) * X; 
+        A = X * QP / self.__density
+        kbcor2 = (-B + np.sqrt(B * B - 4 * A * C)) / (2 * A) 
+        kb2 = np.sqrt(-C / A)
+        G = self.__young_module / (2 * (1 + self.__poisson_module))
+        kT2 = -C * self.__density * chi / G
+        kL2 = -C * self.__density / QP
+        kS2 = kT2 + kL2
+        ASI = 1 + X * (kbcor2 * kT2 / kL2 - kT2)
+        ASI = ASI * ASI 
+        BSI = 1 - X * kT2 + kbcor2 * kS2 / (kb2 * kb2) 
+        CSI = np.sqrt(1 - X * kT2 + kS2 * kS2 / (4 * kb2 * kb2)) 
+        
+        return ASI / (BSI * CSI)
+            
+    def __sigma(self, G, freq):
+        # Definición de constantes: 
+        c0 = self.__vel_sound_air  #Velocidad sonido [m/s] 
+        w = 1.3
+        beta = 0.234 
+        n = 2
+        S = self.__lx * self.__ly
+        U = 2 * (self.__lx + self.__ly)
+        
+        twoa = 4 * S / U
+        
+        k = 2 * np.pi * freq / c0 
+        f = w * np.sqrt(np.pi / (k * twoa)) 
+        
+        if f > 1: 
+            f = 1 
+        
+        h = 1 / (np.sqrt(k * twoa / np.pi) * 2 / 3 - beta)
+        q = 2 * np.pi / (k**2 * S)
+        qn = q**n
+        
+        if G < f:
+            alpha = h / f - 1 
+            xn = (h - alpha * G)**n 
+        else:
+            xn = G**n 
+        
+        rad = (xn + qn)**(-1 / n)
+        
+        return rad
     
+    def __single_leaf_davy(self, f):
+        
+        po = self.__density_air # Densidad del aire [Kg/m3] 
+        c0 = self.__vel_sound_air # Velocidad sonido [m/s] 
+        cos21Max = 0.9 # Ángulo limite definido en el trabajo de Davy 
+        
+        critical_frequency = np.sqrt(12 * self.__density * (1 - self.__poisson_module**2) / self.__young_module) * c0**2 / (2 * self.__thickness * np.pi) 
+        
+        normal = po * c0 / (np.pi * f * self.__mass_sup) 
+        
+        e = 2 * self.__lx * self.__ly / (self.__lx + self.__ly)
+        
+        cos2l = c0 / (2 * np.pi * f * e)
+        
+        if cos2l > cos21Max:
+            cos2l = cos21Max 
+        
+        tau1 = normal**2 * np.log((normal**2 + 1) / (normal**2 + cos2l)) # Con logaritmo en base e (ln)
+        ratio = f / critical_frequency
+        r = 1 - 1 / ratio
+        
+        if r < 0: 
+            r = 0
+        
+        G = np.sqrt(r) 
+
+        rad = self.__sigma(G, f)
+
+        netatotal = self.__loss_factor + rad * normal
+
+        z = 2 / netatotal
+
+        y = np.arctan(z) - np.arctan(z * (1 - ratio))
+        
+        tau2 = normal**2 * rad**2 * y / (netatotal * 2 * ratio)
+        tau2 = tau2 * self.__shear(f) 
+
+        if f < critical_frequency: 
+            tau = tau1 + tau2
+        else: 
+            tau = tau2
+
+        single_leaf = -10 * np.log10(tau)
+
+        return single_leaf
+
+    def davy_model(self, filter_oct="third_oct"):
+        self.mass_sup
+        self.stiffness
+        self.freq_critic
+        self.freq_res
+        
+        reduction = []
+        averages = 3 # % Promedio definido por Davy
+        R = []
+            
+        if filter_oct == "oct": 
+            frequencies = [31.5,63,125,250,500,1000,2000,4000,8000,16000]
+            dB = 0.707
+            octave = 1 
+        
+        if filter_oct == "third_oct": 
+            frequencies=[20,25,31.5,40,50,63,80,100,125,160,200,250,315,400,500,630,800,1000,1250,1600,2000,2500,3150,4000,5000,6000,8000,10000,12500,16000,20000]
+            dB = 0.236 
+            octave = 3 
+        
+        f_analysis = np.append(frequencies, self.__freq_critic)
+        f_analysis.sort()
+        
+        for f in f_analysis:  
+            n_tot= self.__loss_factor + (self.__mass_sup/(485*np.sqrt(f)))
+            ratio = f/self.__freq_critic
+            limit = 2**(1/(2*octave))
+            
+            if (ratio < 1 / limit) or (ratio > limit):
+                transmission_lost = self.__single_leaf_davy(f) 
+            else:
+                av_single_leaf = 0
+                for j in range(averages):
+                    factor = 2**((2*j-1-averages)/(2*averages*octave))
+                    aux=10**(-self.__single_leaf_davy(f*factor)/10)
+                    av_single_leaf = av_single_leaf + aux
+                
+                transmission_lost = -10*np.log10(av_single_leaf/averages)
+        
+            reduction.append(transmission_lost)
+            
+        return f_analysis, reduction
+        
+        # función [single_leaf] = Single_leaf_Davy(frequency, density, Young, Poisson, thickness, lossfactor, length, width) 
+        
+        
+        
+        # función [rad] = Sigma(G, freq, width, length) 
+         
+        
+        # función [out] = shear(frequency, density, Young, Poisson, thickness) 
+       

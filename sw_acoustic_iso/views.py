@@ -26,9 +26,9 @@ def index(request):
             f_sharp, r_sharp = panel.sharp_model(f_per_thirds)
             
             fig = go.Figure()
-            fig.add_trace(go.Scatter(x=f_cremer, y=r_cremer, name="Cremer"), )
-            fig.add_trace(go.Scatter(x=f_davy, y=r_davy, name="Davy"))
-            fig.add_trace(go.Scatter(x=f_sharp, y=r_sharp, name="Sharp"))
+            fig.add_trace(go.Scatter(x=f_cremer, y=r_cremer, name="Cremer", line=dict(color='blue', width=1)) )
+            fig.add_trace(go.Scatter(x=f_davy, y=r_davy, name="Davy", line=dict(color='green', width=1)))
+            fig.add_trace(go.Scatter(x=f_sharp, y=r_sharp, name="Sharp", line=dict(color='red', width=1)))
             # fig = px.line(x=f_cremer, y=r_cremer, log_x=True, color_discrete_sequence=['red'], labels={'x': 'Frecuencia [Hz]', 'y': 'R [dB]'})
             # fig.update_layout(legend_title_text='Aislamiento ', legend, autosize=True)
             # fig.update_xaxes(tickvals=f_per_thirds, ticktext=f_per_thirds)

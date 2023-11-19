@@ -99,12 +99,7 @@ class Panel():
     # MODELO DE CREMER
     def cremer_model(self, frequencies):
         
-        # self.mass_sup
-        # self.stiffness
-        # self.freq_critic
-        # self.freq_res
-        f_analysis = np.append(frequencies, self.__freq_critic)
-        f_analysis.sort()
+        f_analysis = frequencies
         reduction = []
         
         for f in f_analysis:
@@ -125,12 +120,8 @@ class Panel():
     # MODELO DE SHARP
     
     def sharp_model(self, frequencies):
-        # self.mass_sup
-        # self.stiffness
-        # self.freq_critic
-        # self.freq_res
-        f_analysis = np.append(frequencies, self.__freq_critic)
-        f_analysis.sort()
+        
+        f_analysis = frequencies
         f_interpolation = [] #guarda frecuencias de interpolación
         reduction = []
         r_1 = [] #guarda los r_1 en f>=fc
@@ -150,14 +141,18 @@ class Panel():
                 
                 r_2.append(10*np.log10(1+((np.pi*self.__mass_sup*f)/(self.__density_air*self.__vel_sound_air))**2) - 5.5)
         
-        index_start = np.where(f_analysis == f_interpolation[0])[0][0] - 1
-        index_stop = np.where(f_analysis == f_interpolation[-1])[0][0]
-
-        slope = (min(r_1[0], r_2[0]) - reduction[-1])/(f_analysis[index_stop] - f_analysis[index_start])
-        print(slope)
-        b = reduction[-1] - slope*f_analysis[index_start] 
-        
+        print("freqs ",f_interpolation)
+        print(reduction)
+        index_start = f_analysis.index(f_interpolation[0]) 
+        index_stop = f_analysis.index(f_interpolation[-1]) + 1
+        print(f_analysis[index_start-1], f_analysis[index_stop])
+        # print("start ", index_start)
+        slope = (min(r_1[0], r_2[0]) - reduction[-1])/(f_analysis[index_stop] - f_analysis[index_start-1])
+        print("slope: ", slope)
+        b = reduction[-1] - slope*f_analysis[index_start-1] 
+        print("b: ", b)
         for f in f_analysis[index_start:index_stop]:
+            print(f)
             r = slope*f + b
             print(f, r)
             reduction.append(r)
@@ -267,10 +262,6 @@ class Panel():
         return single_leaf
 
     def davy_model(self, filter_oct="third_oct"):
-        # self.mass_sup
-        # self.stiffness
-        # self.freq_critic
-        # self.freq_res
         
         reduction = []
         averages = 3 # % Promedio definido por Davy
@@ -286,15 +277,14 @@ class Panel():
             dB = 0.236 
             octave = 3 
         
-        f_analysis = np.append(frequencies, self.__freq_critic)
-        f_analysis.sort()
+        f_analysis = frequencies
         
         for f in f_analysis:  
             n_tot= self.__loss_factor + (self.__mass_sup/(485*np.sqrt(f)))
             ratio = f/self.__freq_critic
             limit = 2**(1/(2*octave))
             
-            if (ratio < 1 / limit) or (ratio > limit):
+            if (ratio <= 1 / limit) or (ratio > limit):
                 transmission_lost = self.__single_leaf_davy(f) 
             else:
                 av_single_leaf = 0

@@ -16,8 +16,16 @@ class Panel():
         self.__stiffness = 0
         self.__mass_sup = 0
         self.__freq_critic = 0
+        self.__freq_density = 0
         self.__freq_res = 0
-    
+
+        #Llamado a calculo de propiedades:
+        self.mass_sup
+        self.stiffness
+        self.freq_critic
+        self.freq_res
+        self.freq_density
+        
     @property
     def lx(self):
         return self.__lx
@@ -73,6 +81,11 @@ class Panel():
             return self.__freq_critic
         else:
             raise('Thickness cant be zero')
+        
+    @property
+    def freq_density(self):
+        self.__freq_density = (self.__young_module/(2*np.pi*self.__density))*np.sqrt(self.__mass_sup/self.__stiffness)
+        return self.__freq_density
     
     @property
     def freq_res(self):
@@ -83,29 +96,76 @@ class Panel():
     def data(self):
         return f'Material: {self.__name}\n Densidad: {self.__density}\n Módulo de Young: {self.__young_module}\n Factor de pérdidas: {self.__loss_factor}\n Módulo de Poisson: {self.__poisson_module}'
     
+    # MODELO DE CREMER
     def cremer_model(self, frequencies):
         
-        self.mass_sup
-        self.stiffness
-        self.freq_critic
-        self.freq_res
+        # self.mass_sup
+        # self.stiffness
+        # self.freq_critic
+        # self.freq_res
         f_analysis = np.append(frequencies, self.__freq_critic)
         f_analysis.sort()
         reduction = []
         
         for f in f_analysis:
-            if f < self.__freq_critic:
+            if f < self.__freq_critic or f >= self.__freq_density:
                 r = 20*np.log10(self.__mass_sup*f) - 47 
                 reduction.append(r)
             elif f == self.__freq_critic:
-                r = 20*np.log10(self.__mass_sup*f) - 47 - 10*np.log10(np.pi/(4*(self.__loss_factor+self.__mass_sup/(485*np.sqrt(f))))) 
-                reduction.append(r)
-            else:
-                r = 20*np.log10(self.__mass_sup*f) - 47 - 10*np.log10(np.pi/4*(self.__loss_factor+self.__mass_sup/(485*np.sqrt(f)))) + 10*np.log10(f/self.__freq_critic) + 10*np.log10(1-self.__freq_critic/f) 
-                reduction.append(r)
+                n_tot = self.__loss_factor + self.__mass_sup/(485*np.sqrt(f)) 
+                r = 20*np.log10(self.__mass_sup*f) - 10*np.log10(np.pi/(4*n_tot)) - 47
+            elif (f >= self.__freq_critic) and (f < self.__freq_density):
+                n_tot = self.__loss_factor + self.__mass_sup/(485*np.sqrt(f)) 
                 
+                r = 20*np.log10(self.__mass_sup*f) - 10*np.log10(np.pi/(4*n_tot)) + 10*np.log10(f/self.__freq_critic) + 10*np.log10(1 - self.__freq_critic/f) - 47
+                reduction.append(r)
+
         return f_analysis, reduction
     
+    # MODELO DE SHARP
+    
+    def sharp_model(self, frequencies):
+        # self.mass_sup
+        # self.stiffness
+        # self.freq_critic
+        # self.freq_res
+        f_analysis = np.append(frequencies, self.__freq_critic)
+        f_analysis.sort()
+        f_interpolation = [] #guarda frecuencias de interpolación
+        reduction = []
+        r_1 = [] #guarda los r_1 en f>=fc
+        r_2 = [] #guarda los r_2 en f>=fc
+        
+        for f in f_analysis:
+            if f < self.__freq_critic/2:
+                r = 10*np.log10(1+((np.pi*self.__mass_sup*f)/(self.__density_air*self.__vel_sound_air))**2) - 5.5
+                # print(f, r)
+                reduction.append(r)
+            elif f>= self.__freq_critic/2 and f<self.__freq_critic:
+                f_interpolation.append(f)
+            elif f >= self.__freq_critic:
+                n_tot = self.__loss_factor + self.__mass_sup/(485*np.sqrt(f))
+                
+                r_1.append(10*np.log10(1+((np.pi*self.__mass_sup*f)/(self.__density_air*self.__vel_sound_air))**2) + 10*np.log10((2*f*n_tot)/(np.pi*self.__freq_critic)))
+                
+                r_2.append(10*np.log10(1+((np.pi*self.__mass_sup*f)/(self.__density_air*self.__vel_sound_air))**2) - 5.5)
+        
+        index_start = np.where(f_analysis == f_interpolation[0])[0][0] - 1
+        index_stop = np.where(f_analysis == f_interpolation[-1])[0][0]
+
+        slope = (min(r_1[0], r_2[0]) - reduction[-1])/(f_analysis[index_stop] - f_analysis[index_start])
+        print(slope)
+        b = reduction[-1] - slope*f_analysis[index_start] 
+        
+        for f in f_analysis[index_start:index_stop]:
+            r = slope*f + b
+            print(f, r)
+            reduction.append(r)
+
+        reduction = reduction + min(r_1, r_2)
+        
+        return f_analysis, reduction
+                
     # MODELO DE DAVY
     def __shear(self, f):
         omega = 2 * np.pi * f
@@ -207,10 +267,10 @@ class Panel():
         return single_leaf
 
     def davy_model(self, filter_oct="third_oct"):
-        self.mass_sup
-        self.stiffness
-        self.freq_critic
-        self.freq_res
+        # self.mass_sup
+        # self.stiffness
+        # self.freq_critic
+        # self.freq_res
         
         reduction = []
         averages = 3 # % Promedio definido por Davy

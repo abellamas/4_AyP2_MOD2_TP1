@@ -57,7 +57,7 @@ def index(request):
             
             fig_html = fig.to_html()
             
-            reduction_df = pd.DataFrame(data=[r_cremer, r_davy, r_sharp, r_iso], columns=f_per_thirds, index=['Cremer', 'Davy', 'Sharp', 'ISO 12354-1'])
+            reduction_df = pd.DataFrame(data=[r_cremer, r_davy, r_sharp, r_iso], columns=f_per_thirds, index=['Cremer', 'Davy', 'Sharp', 'ISO'])
                 
             # Load the workbook
             wb = load_workbook('data/template.xlsx')

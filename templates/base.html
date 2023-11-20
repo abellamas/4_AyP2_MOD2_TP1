@@ -41,23 +41,86 @@
 
     {% block link %}{% endblock %}
     {% block script %}{% endblock %}
-    {% block title %}{% endblock %}
+    {% block title %}
+    <title>AyP2 MOD II </title>
+    {% endblock %}
 </head>
 <body>
     {% block header %}{% endblock %}
     {% block main %}{% endblock %}
     {% comment %} {% include 'components/footer.html' %} {% endcomment %}
-    Hola Mundo
-    <form method="post">
-        {% csrf_token %}
-        {{ material_form.as_div }}
-        {{ dimensions_form.as_div }}
+    <div class="px-5 mx-2 py-3 text-center ">
+        <h4>
+            Aislamiento a ruido aéreo de una pared simple mediante distintos métodos de predicción.
+        </h4>
+        
+        <div class="d-flex flex-row">
+            <div class="col-3 d-flex justify-content-center flex-column" > 
+                <form method="post">
+                    {% csrf_token %}
+                    {{ material_form.as_div }}
+                    <div class="d-flex flex-row gap-2">
+                        {{ dimensions_form.as_div }}
+                    </div>
+                    <input type="submit" class="btn btn-primary my-3" value="Calcular">
+                    <a href="{% url 'export_excel' %}"><button type="button" class="btn btn-success">Exportar</button></a>
+                </form>
+                
+                <div class="">
+                    {% if stiffness %}
+                    <div class="px-1 py-4 bg-light rounded">
+                        <p>Rigidez: {{ stiffness | floatformat:0 }} N/m</p>
+                        <p>Masa superficial: {{ mass_sup | floatformat:0 }} Kg/m2</p>
+                        <p>Frecuencia de resonancia: {{ freq_res | floatformat:0 }} Hz</p>
+                        <p>Frecuencia crítica: {{ freq_critic | floatformat:0 }} Hz</p>
+                        <p>Frecuencia densidad: {{ freq_density | floatformat:0 }} Hz</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-9 px-1">
+                {{ fig_html|safe }}
+            </div>
+        </div>
+        
+        
+        
+        <div class="px-3 container" style="overflow-x:auto">
+            <table class="table table-striped">
+                <thead>
+                    {% for field in reduction_arr.schema.fields  %}
+                    {% if field.name == "index" %}
+                    <th scope="col">Modelo</th>
+                    {% else %}
+                    <th scope="col"> {{field.name | stringformat:"s"}} </th>
+                    {% endif %}
+                    {% endfor %}
+                </thead>
+                <tbody>
+                    {% for rows in reduction_arr.data  %}
+                        <tr>
+                            {% for key, value in rows.items %}
+                            
+                            {% if key == "index" %}
+                                <th scope="row">{{value}}</th>
+                            {% else %}
+                                <td>{{value | floatformat:2}}</td>
+                            {% endif %}
+                            {% endfor %}
+                            {% comment %} <td>{{value}}</td> {% endcomment %}
+                        </tr>    
+                    {% endfor %}
+                    
+                </tbody>
+            </table>
+        </div> 
 
-        <input type="submit" value="Calcular">
-    </form>
-
-    {{fig_html|safe}}
-
+         
+    </div>
+    
+    
+    
+    
     {# scripts #}
     {% comment %} <script src="{% static 'js/navbar.js' %}?{% now 'U'%}"></script> {% endcomment %}
     

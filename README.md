@@ -15,11 +15,19 @@ python -m virtualenv .venv
 ```console
 pip install -r requirements.txt
 ```
-4. Iniciar el servidor
-```console
-python manage.py runserver
-```
-5. Carga de materiales de .xlsx -> .csv a base de datos db.sqlite3
+4. Migrar los modelos a la base de datos
+   Deben aplicarse los cambios y crearse todas las tablas para los materiales, para ello deben ejecutarse los siguientes comandos.
+   
+   ```console
+   python manage.py makemigrations
+   ```
+   ```console
+   python manage.py migrate
+   ```
+
+   Por defecto la base de datos utilizada es db.sqlite3, puede cambiarse por PostgreSQL o MySQL para mayor rendimiento. Para este caso práctico se decide utilizar sqlite3, ya que dicha base de dato es mas sencilla y puede leerse con la aplicación ``DB Browser for sqlite3` https://sqlitebrowser.org/
+   
+5. Carga de materiales de .xlsx -> .csv a base de datos
 
 Los materiales a cargar desde un excel .xlsx deben transformarse a un .csv delimitado por comas que deberá estar en el siguiente directorio */data/materiales_db.csv*. 
 Debe tenerse cuidado con los carácteres utilizados, por ej. evitar el uso de ñ, diéresis, acentos, etc.  Tambien se recomienda revisar que todos los números transformados de excel .xlsx a .csv coincidan, en especial las unidades pequeñas.
@@ -36,7 +44,11 @@ python manage.py makemigrations
 ```console
 python manage.py migrate
 ```
-6. Exportación de archivo Excel con resultados
+6. Iniciar el servidor
+```console
+python manage.py runserver
+```
+# Exportación de archivo Excel con resultados
 
 Para exportar los resultados se usa un template base que se encuentra en */data/template.xlsx*.
 Por el momento, en cada simulación se genera internamente un archivo excel */data/templates.xlsx* que no se descarga hasta que el usuario presiona el botón de _*Exportar*_.

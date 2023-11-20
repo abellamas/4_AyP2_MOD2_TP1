@@ -50,8 +50,8 @@ def index(request):
                     xanchor="right",
                     x=1
                 ),
-                xaxis_title = "R [dB]",
-                yaxis_title = "Frecuencia [Hz]",
+                yaxis_title = "R [dB]",
+                xaxis_title = "Frecuencia [Hz]",
                 template = 'plotly_white'
             )
             
@@ -86,9 +86,6 @@ def index(request):
             
         else:
             print("Error en la validacion")
-            #agregar mensaje de error
-            pass
-            # return render(request, 'base.html', {'material_form': material_form, 'dimensions_form': dimensions_form})
             
     elif request.method == "GET":
         dimensions_form = DimensionsPanel()

@@ -140,14 +140,13 @@ class Panel():
                 
                 r_2.append(float(round(10*np.log10(1+((np.pi*self.__mass_sup*f)/(self.__density_air*self.__vel_sound_air))**2) - 5.5, 2)))
         
-    
-        index_start = f_analysis.index(f_interpolation[0]) 
-        index_stop = f_analysis.index(f_interpolation[-1]) + 1
-        print("fc", self.__freq_critic)
-        print(f_analysis[index_stop])
-        print(f_analysis[index_start-1])
-        print("reduction ",reduction)
+        # print("fc", self.__freq_critic)
+        # print(f_analysis[index_stop])
+        # print(f_analysis[index_start-1])
+        # print("reduction ",reduction)
         if len(reduction) != 0:
+            index_start = f_analysis.index(f_interpolation[0]) 
+            index_stop = f_analysis.index(f_interpolation[-1]) + 1
             slope = (min(r_1[0], r_2[0]) - reduction[-1])/(f_analysis[index_stop] - f_analysis[index_start-1])
             b = reduction[-1] - slope*f_analysis[index_start-1] 
         
@@ -272,7 +271,7 @@ class Panel():
         
         return frequencies, R_davy
             
-    # # MODELO DE DAVY
+    # MODELO DE DAVY
     # def __shear(self, f):
     #     omega = 2 * np.pi * f
     #     chi = (1 + self.__poisson_module) / (0.87 + 1.12 * self.__poisson_module) 
